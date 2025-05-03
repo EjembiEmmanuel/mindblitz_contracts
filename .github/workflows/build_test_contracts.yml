@@ -27,8 +27,8 @@ jobs:
           asdf install scarb 2.9.4
           asdf global scarb 2.9.4
           asdf plugin add dojo https://github.com/dojoengine/asdf-dojo
-          asdf install dojo 1.4.0 
-          asdf global dojo 1.4.0
+          asdf install dojo 1.4.2 
+          asdf global dojo 1.4.2
 
       - name: Build contracts
         run: |
