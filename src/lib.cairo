@@ -1,13 +1,11 @@
-pub mod interfaces {
-    pub mod IMindBlitz;
-}
-
 pub mod systems {
-    pub mod Mindblitz;
+    pub mod actions;
 }
 
 pub mod models {
     pub mod player;
+    pub mod game;
+    pub mod card;
 }
 
 pub mod tests {
