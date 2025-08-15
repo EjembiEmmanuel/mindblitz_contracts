@@ -1,19 +1,31 @@
 #[cfg(test)]
 mod tests {
     use dojo_cairo_test::WorldStorageTestTrait;
-    // use dojo::model::{ModelStorage, ModelStorageTest};
-    // use dojo::world::WorldStorageTrait;
+    use dojo::model::{ModelStorage, ModelStorageTest};
+    use dojo::world::WorldStorageTrait;
     use dojo_cairo_test::{
         spawn_test_world, NamespaceDef, TestResource, ContractDefTrait, ContractDef,
     };
 
-    // use mindblitz::interfaces::IMindBlitz::{IMindBlitzDispatcher, IMindBlitzDispatcherTrait};
-    use mindblitz::systems::Mindblitz::Mindblitz;
+    use mindblitz::models::card::{Card, m_Card};
+    use mindblitz::models::game::{Game, m_Game};
+    use mindblitz::models::player::{Player, m_Player};
+    use mindblitz::systems::actions::{actions, IActionsDispatcher, IActionsDispatcherTrait};
 
     fn namespace_def() -> NamespaceDef {
         let ndef = NamespaceDef {
             namespace: "mindblitz",
-            resources: [TestResource::Contract(Mindblitz::TEST_CLASS_HASH)].span(),
+            resources: [
+                TestResource::Model(m_Card::TEST_CLASS_HASH),
+                TestResource::Model(m_Game::TEST_CLASS_HASH),
+                TestResource::Model(m_Player::TEST_CLASS_HASH),
+                TestResource::Event(actions::e_GameCreated::TEST_CLASS_HASH),
+                TestResource::Event(actions::e_GameEnded::TEST_CLASS_HASH),
+                TestResource::Event(actions::e_PlayerCreated::TEST_CLASS_HASH),
+                TestResource::Event(actions::e_CardClicked::TEST_CLASS_HASH),
+                TestResource::Contract(actions::TEST_CLASS_HASH),
+            ]
+                .span(),
         };
 
         ndef
@@ -21,7 +33,7 @@ mod tests {
 
     fn contract_defs() -> Span<ContractDef> {
         [
-            ContractDefTrait::new(@"mindblitz", @"mindblitz")
+            ContractDefTrait::new(@"mindblitz", @"actions")
                 .with_writer_of([dojo::utils::bytearray_hash(@"mindblitz")].span())
         ]
             .span()

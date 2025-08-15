@@ -1,7 +1,7 @@
 [package]
-cairo-version = "=2.9.4"
+cairo-version = "=2.10.1"
 name = "mindblitz"
-version = "1.0.0"
+version = "1.6.0"
 edition = "2024_07"
 
 [cairo]
@@ -9,15 +9,17 @@ sierra-replace-ids = true
 
 [scripts]
 migrate = "sozo build && sozo migrate"                      # scarb run migrate
-spawn = "sozo execute mindblitz-actions spawn --wait"    # scarb run spawn
-move = "sozo execute mindblitz-actions move -c 1 --wait" # scarb run move
+register_player = "sozo execute mindblitz-actions register_player --wait -- 0x6f636865"    # scarb run register_player
+create_game = "sozo execute mindblitz-actions create_game --wait -- 0x01"    # scarb run create_game
+click_card = "sozo execute mindblitz-actions click_card --wait -- 0x01 0x01"    # scarb run click_card
+test = "sozo test"
 
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.2" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.2" }
 
 [[target.starknet-contract]]
 build-external-contracts = ["dojo::world::world_contract::world"]
 
 [dev-dependencies]
-cairo_test = "=2.9.4"
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.2" }
+cairo_test = "=2.10.1"
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.2" }
