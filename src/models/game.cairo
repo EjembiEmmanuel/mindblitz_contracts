@@ -30,10 +30,10 @@ pub struct GameCounter {
 /// - `player`: Username of the player
 /// - `score`: Current score (number of unique cards clicked)
 /// - `best_score`: Best score achieved by this player
+/// - `max_score`: Maximum score needed to win (based on difficulty)
 /// - `status`: Game status (Active or Ended)
 /// - `start_time`: When the game started
 /// - `end_time`: When the game ended (0 if not finished)
-/// - `board_size`: Number of cards shown in the current game (e.g., 4, 5, 6)
 /// - `difficulty_level`: Difficulty level (Easy, Medium, Hard)
 #[derive(Drop, Copy, Serde)]
 #[dojo::model]
@@ -41,18 +41,19 @@ pub struct Game {
     #[key]
     pub game_id: u64,
     pub player: felt252,
-    pub score: u256,
-    pub best_score: u256,
+    pub score: u8,
+    pub best_score: u8,
+    pub max_score: u8,
     pub status: GameStatus,
     pub start_time: u64,
     pub end_time: u64,
-    pub board_size: u8,
     pub collection_size: u8,
     pub difficulty_level: DifficultyLevel,
 }
 
 pub trait GameTrait {
     fn new(game_id: u64, player: felt252, difficulty_level: DifficultyLevel) -> Game;
+    fn check_win_status(ref self: Game) -> bool;
     fn update_best_score(ref self: Game);
     fn restart(ref self: Game);
     fn end_game(ref self: Game);
@@ -60,11 +61,11 @@ pub trait GameTrait {
 
 impl GameImpl of GameTrait {
     fn new(game_id: u64, player: felt252, difficulty_level: DifficultyLevel) -> Game {
-        // Set board size and collection size based on difficulty
-        let board_size = match difficulty_level {
-            DifficultyLevel::Easy => 4,
-            DifficultyLevel::Medium => 6,
-            DifficultyLevel::Hard => 8,
+        // Set max score based on difficulty
+        let max_score = match difficulty_level {
+            DifficultyLevel::Easy => 10,
+            DifficultyLevel::Medium => 15,
+            DifficultyLevel::Hard => 20,
         };
 
         Game {
@@ -72,13 +73,21 @@ impl GameImpl of GameTrait {
             player,
             score: 0,
             best_score: 0,
+            max_score,
             status: GameStatus::Active,
             start_time: get_block_timestamp(),
             end_time: 0,
-            board_size,
             collection_size: 20,
             difficulty_level,
         }
+    }
+
+    fn check_win_status(ref self: Game) -> bool {
+        if (self.score == self.max_score) {
+            return true;
+        }
+
+        return false;
     }
 
     fn update_best_score(ref self: Game) {
@@ -119,7 +128,6 @@ mod tests {
         assert(game.score == 0, 'score 0');
         assert(game.best_score == 0, 'best_score 0');
         assert(game.status == GameStatus::Active, 'status active');
-        assert(game.board_size == 6, 'medium 6 cards');
         assert(game.collection_size == 20, 'collection 20');
         assert(game.difficulty_level == difficulty_level, 'difficulty match');
         assert(game.start_time > 0, 'start_time set');
@@ -137,15 +145,15 @@ mod tests {
 
         // Test Easy difficulty
         let easy_game = GameTrait::new(game_id, player, DifficultyLevel::Easy);
-        assert(easy_game.board_size == 4, 'easy 4 cards');
+        assert(easy_game.max_score == 10, 'easy max score 10');
 
         // Test Medium difficulty
         let medium_game = GameTrait::new(game_id + 1, player, DifficultyLevel::Medium);
-        assert(medium_game.board_size == 6, 'medium 6 cards');
+        assert(medium_game.max_score == 15, 'medium max score 15');
 
         // Test Hard difficulty
         let hard_game = GameTrait::new(game_id + 2, player, DifficultyLevel::Hard);
-        assert(hard_game.board_size == 8, 'hard 8 cards');
+        assert(hard_game.max_score == 20, 'hard max score 20');
     }
 
     #[test]

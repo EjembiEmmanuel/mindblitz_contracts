@@ -11,15 +11,15 @@ pub trait IActions<T> {
     // Game management
     fn create_new_game_id(ref self: T) -> u64;
     fn create_game(ref self: T, difficulty_level: DifficultyLevel);
+    fn restart_game(ref self: T, game_id: u64);
+    fn end_game(ref self: T, game_id: u64);
 
     // Card management
     fn click_card(ref self: T, game_id: u64, card_id: u8);
 
+    // Getters
     fn get_username_from_address(self: @T, address: ContractAddress) -> felt252;
     fn get_address_from_username(self: @T, username: felt252) -> ContractAddress;
-
-    // Game actions
-    fn end_game(ref self: T, game_id: u64);
 }
 
 
@@ -34,11 +34,8 @@ pub mod actions {
     use dojo::event::EventStorage;
 
     use mindblitz::models::card::{Card, CardTrait};
-    use mindblitz::models::player::{
-        Player, PlayerTrait, PlayerStats, UsernameToAddress, AddressToUsername,
-    };
+    use mindblitz::models::player::{Player, PlayerTrait, UsernameToAddress, AddressToUsername};
     use mindblitz::models::game::{Game, GameTrait, GameStatus, GameCounter};
-
 
     #[derive(Copy, Drop, Serde)]
     #[dojo::event]
@@ -46,6 +43,23 @@ pub mod actions {
         #[key]
         pub game_id: u64,
         pub owner: ContractAddress,
+        pub timestamp: u64,
+    }
+
+    #[derive(Copy, Drop, Serde)]
+    #[dojo::event]
+    pub struct GameRestarted {
+        #[key]
+        pub game_id: u64,
+        pub owner: ContractAddress,
+        pub timestamp: u64,
+    }
+
+    #[derive(Copy, Drop, Serde)]
+    #[dojo::event]
+    pub struct GameEnded {
+        #[key]
+        pub game_id: u64,
         pub timestamp: u64,
     }
 
@@ -68,14 +82,6 @@ pub mod actions {
         #[key]
         pub game_id: u64,
         pub player: ContractAddress,
-        pub timestamp: u64,
-    }
-
-    #[derive(Copy, Drop, Serde)]
-    #[dojo::event]
-    pub struct GameEnded {
-        #[key]
-        pub game_id: u64,
         pub timestamp: u64,
     }
 
@@ -157,6 +163,44 @@ pub mod actions {
                 );
         }
 
+        fn restart_game(ref self: ContractState, game_id: u64) {
+            let mut world = self.world_default();
+
+            let caller = get_caller_address();
+
+            let username = self.get_username_from_address(caller);
+            assert(username != 0, 'PLAYER NOT REGISTERED');
+
+            let mut game: Game = world.read_model(game_id);
+            assert(game.player == username, 'PLAYER DOES NOT OWN THE GAME');
+
+            GameTrait::restart(ref game);
+
+            let mut i: u8 = 0;
+            loop {
+                if i >= game.collection_size {
+                    break;
+                }
+
+                let mut card: Card = world.read_model((game_id, i));
+
+                let is_clicked = card.is_clicked;
+                if is_clicked {
+                    CardTrait::update_click_status(ref card, false);
+                    world.write_model(@card);
+                }
+
+                i += 1;
+            };
+
+            world.write_model(@game);
+
+            world
+                .emit_event(
+                    @GameRestarted { game_id, owner: caller, timestamp: get_block_timestamp() },
+                );
+        }
+
         // Card management
         fn click_card(ref self: ContractState, game_id: u64, card_id: u8) {
             let mut world = self.world_default();
@@ -182,10 +226,27 @@ pub mod actions {
                 world.write_model(@card);
 
                 game.score += 1;
+
+                let has_won = GameTrait::check_win_status(ref game);
+
+                if (has_won) {
+                    if game.score > game.best_score {
+                        GameTrait::update_best_score(ref game);
+                    }
+
+                    GameTrait::end_game(ref game);
+
+                    let mut player: Player = world.read_model(game.player);
+                    player.total_games_played += 1;
+                    player.total_games_won += 1;
+
+                    world.write_model(@player);
+
+                    world.emit_event(@GameEnded { game_id, timestamp: get_block_timestamp() });
+                }
+
                 world.write_model(@game);
             } else {
-                let mut game: Game = world.read_model(game_id);
-
                 // Update best score if needed
                 if game.score > game.best_score {
                     GameTrait::update_best_score(ref game);
@@ -193,14 +254,11 @@ pub mod actions {
 
                 GameTrait::end_game(ref game);
 
-                let mut player_stats: PlayerStats = world.read_model(game.player);
-                player_stats.total_games_played += 1;
+                let mut player: Player = world.read_model(game.player);
+                player.total_games_played += 1;
+                player.total_games_lost += 1;
 
-                if (game.score > player_stats.best_score) {
-                    player_stats.best_score = game.score;
-                }
-
-                world.write_model(@player_stats);
+                world.write_model(@player);
 
                 world.write_model(@game);
 
@@ -254,14 +312,10 @@ pub mod actions {
             GameTrait::end_game(ref game);
 
             // Update player stats
-            let mut player_stats: PlayerStats = world.read_model(game.player);
-            player_stats.total_games_played += 1;
+            let mut player: Player = world.read_model(game.player);
+            player.total_games_played += 1;
 
-            if (game.score > player_stats.best_score) {
-                player_stats.best_score = game.score;
-            }
-
-            world.write_model(@player_stats);
+            world.write_model(@player);
 
             world.write_model(@game);
 

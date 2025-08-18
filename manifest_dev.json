@@ -1328,8 +1328,8 @@
   },
   "contracts": [
     {
-      "address": "0x637df8e22af22205298e6bc44a57aa3da2db1a3e7ef65ce515e66ee62209f8",
-      "class_hash": "0xaae555ef522adc4e4c19cac58ff1580d7db7b81d5658d0142dbb752383f277",
+      "address": "0x2055682c96765237b7c9c578ff97a1f9e5ad63b0a2b108e7981448e398c4a68",
+      "class_hash": "0xe91f27ab0dcd0bc8486a07a142a9c1c9ec33c2cfb5550c37b58d445ed9cd81",
       "abi": [
         {
           "type": "impl",
@@ -1445,6 +1445,30 @@
             },
             {
               "type": "function",
+              "name": "restart_game",
+              "inputs": [
+                {
+                  "name": "game_id",
+                  "type": "core::integer::u64"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "end_game",
+              "inputs": [
+                {
+                  "name": "game_id",
+                  "type": "core::integer::u64"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
               "name": "click_card",
               "inputs": [
                 {
@@ -1490,18 +1514,6 @@
                 }
               ],
               "state_mutability": "view"
-            },
-            {
-              "type": "function",
-              "name": "end_game",
-              "inputs": [
-                {
-                  "name": "game_id",
-                  "type": "core::integer::u64"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "external"
             }
           ]
         },
@@ -1627,8 +1639,9 @@
         "register_player",
         "create_new_game_id",
         "create_game",
-        "click_card",
+        "restart_game",
         "end_game",
+        "click_card",
         "upgrade"
       ]
     }
@@ -1649,7 +1662,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x3613585037911bf09f875fab882a843027fc95be585c2c5c22177a004489ef3",
+      "class_hash": "0x4b50327f918a07a83c5b114d0e29018ab9a5b742d4a11a12d1ea9efe7f5ac21",
       "tag": "mindblitz-Game",
       "selector": "0x313597bd6dc28ec0c0bf2345ab10620cc3ce446e5dd149ac29ee7c4d2fbf7b2"
     },
@@ -1661,15 +1674,9 @@
     },
     {
       "members": [],
-      "class_hash": "0x43b727062fb3edb6be9249f3ceaa6648e98666d4fc781dbc7bde85d16e41959",
+      "class_hash": "0x4a02edc499f4481c9afb5be517a5de06d5e9a0c97d7a1a1e249de9d7ab297dc",
       "tag": "mindblitz-Player",
       "selector": "0x70a3e203cb3f587c278f3f820fad7d13a4d0db07b08c6848f408f580efa67cb"
-    },
-    {
-      "members": [],
-      "class_hash": "0x563f53dc46867b1775f88c65edff6cd8f894e9f348d7eded0cd7e573993a362",
-      "tag": "mindblitz-PlayerStats",
-      "selector": "0x2cb720a770818daa27ac20ea956618018859187cff8f1aaa144e27756f9c050"
     },
     {
       "members": [],
@@ -1696,6 +1703,12 @@
       "class_hash": "0x440ad277d638660a13503be9f2ad1af3ef82bc749abbc044af77e34c430eb15",
       "tag": "mindblitz-GameEnded",
       "selector": "0xbce49b29bda4dd0bcec59cb48dfc3fb15c07914ead574507adf057ea2c673a"
+    },
+    {
+      "members": [],
+      "class_hash": "0x1988ae660bc9daeec554534dc6c914eefc86f3386d37cfeed8156192769a1ce",
+      "tag": "mindblitz-GameRestarted",
+      "selector": "0x18d3a7f7156c4678fcefe360d492a815010eded76eee3fa398853dc3710a54c"
     },
     {
       "members": [],

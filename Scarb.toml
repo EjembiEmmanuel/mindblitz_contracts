@@ -8,10 +8,15 @@ edition = "2024_07"
 sierra-replace-ids = true
 
 [scripts]
-migrate = "sozo build && sozo migrate"                      # scarb run migrate
-register_player = "sozo execute mindblitz-actions register_player --wait -- 0x6f636865"    # scarb run register_player
-create_game = "sozo execute mindblitz-actions create_game --wait -- 0x01"    # scarb run create_game
-click_card = "sozo execute mindblitz-actions click_card --wait -- 0x01 0x01"    # scarb run click_card
+migrate = "sozo build && sozo migrate"
+register_player1 = "sozo execute mindblitz-actions register_player --wait -- sstr:player1"
+register_player2 = "sozo execute mindblitz-actions register_player --account-address 0x13d9ee239f33fea4f8785b9e3870ade909e20a9599ae7cd62c1c292b73af1b7 --private-key 0x1c9053c053edf324aec366a34c6901b1095b07af69495bffec7d7fe21effb1b --wait -- sstr:player2"
+create_game_player1 = "sozo execute mindblitz-actions create_game --wait -- 0x0"
+create_game_player2 = "sozo execute mindblitz-actions create_game --account-address 0x13d9ee239f33fea4f8785b9e3870ade909e20a9599ae7cd62c1c292b73af1b7 --private-key 0x1c9053c053edf324aec366a34c6901b1095b07af69495bffec7d7fe21effb1b --wait -- 0x01"
+restart_game_player1 = "sozo execute mindblitz-actions restart_game --wait -- 0x01"
+restart_game_player2 = "sozo execute mindblitz-actions restart_game --account-address 0x13d9ee239f33fea4f8785b9e3870ade909e20a9599ae7cd62c1c292b73af1b7 --private-key 0x1c9053c053edf324aec366a34c6901b1095b07af69495bffec7d7fe21effb1b --wait -- 0x02"
+click_card_player1 = "sozo execute mindblitz-actions click_card --wait -- 0x01 0x0a"
+click_card_player2 = "sozo execute mindblitz-actions click_card --account-address 0x13d9ee239f33fea4f8785b9e3870ade909e20a9599ae7cd62c1c292b73af1b7 --private-key 0x1c9053c053edf324aec366a34c6901b1095b07af69495bffec7d7fe21effb1b --wait -- 0x01 0x03"
 test = "sozo test"
 
 [dependencies]
